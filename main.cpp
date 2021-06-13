@@ -1,258 +1,308 @@
+// #include "search_server.h"
 
-#include <algorithm>
-#include <cmath>
+// #include <iostream>
+// #include <string>
+// #include <vector>
+
+// using namespace std;
+
+// int main() {
+//     SearchServer search_server("and with"s);
+
+//     int id = 0;
+//     for (
+//         const string& text : {
+//             "funny pet and nasty rat"s,
+//             "funny pet with curly hair"s,
+//             "funny pet and not very nasty rat"s,
+//             "pet with rat and rat and rat"s,
+//             "nasty rat with curly hair"s,
+//         }
+//     ) {
+//         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
+//     }
+
+//     const string query = "curly and funny -not"s;
+
+//     {
+//         const auto [words, status] = search_server.MatchDocument(query, 1);
+//         cout << words.size() << " words for document 1"s << endl;
+//         // 1 words for document 1
+//     }
+
+//     {
+//         const auto [words, status] = search_server.MatchDocument(execution::seq, query, 2);
+//         cout << words.size() << " words for document 2"s << endl;
+//         // 2 words for document 2
+//     }
+
+//     {
+//         const auto [words, status] = search_server.MatchDocument(execution::par, query, 3);
+//         cout << words.size() << " words for document 3"s << endl;
+//         // 0 words for document 3
+//     }
+
+//     return 0;
+// }
+
+//TEST MatchDocument
+
+// #include "search_server.h"
+
+// #include "log_duration.h"
+
+// #include <execution>
+// #include <iostream>
+// #include <random>
+// #include <string>
+// #include <vector>
+
+// using namespace std;
+
+// string GenerateWord(mt19937& generator, int max_length) {
+//     const int length = uniform_int_distribution(1, max_length)(generator);
+//     string word;
+//     word.reserve(length);
+//     for (int i = 0; i < length; ++i) {
+//         word.push_back(uniform_int_distribution('a', 'z')(generator));
+//     }
+//     return word;
+// }
+
+// vector<string> GenerateDictionary(mt19937& generator, int word_count, int max_length) {
+//     vector<string> words;
+//     words.reserve(word_count);
+//     for (int i = 0; i < word_count; ++i) {
+//         words.push_back(GenerateWord(generator, max_length));
+//     }
+//     sort(words.begin(), words.end());
+//     words.erase(unique(words.begin(), words.end()), words.end());
+//     return words;
+// }
+
+// string GenerateQuery(mt19937& generator, const vector<string>& dictionary, int word_count, double minus_prob = 0) {
+//     string query;
+//     for (int i = 0; i < word_count; ++i) {
+//         if (!query.empty()) {
+//             query.push_back(' ');
+//         }
+//         if (uniform_real_distribution<>(0, 1)(generator) < minus_prob) {
+//             query.push_back('-');
+//         }
+//         query += dictionary[uniform_int_distribution<int>(0, dictionary.size() - 1)(generator)];
+//     }
+//     return query;
+// }
+
+// vector<string> GenerateQueries(mt19937& generator, const vector<string>& dictionary, int query_count, int max_word_count) {
+//     vector<string> queries;
+//     queries.reserve(query_count);
+//     for (int i = 0; i < query_count; ++i) {
+//         queries.push_back(GenerateQuery(generator, dictionary, max_word_count));
+//     }
+//     return queries;
+// }
+
+// template <typename ExecutionPolicy>
+// void Test(string_view mark, SearchServer search_server, const string& query, ExecutionPolicy&& policy) {
+//     LOG_DURATION(mark);
+//     const int document_count = search_server.GetDocumentCount();
+//     int word_count = 0;
+//     for (int id = 0; id < document_count; ++id) {
+//         const auto [words, status] = search_server.MatchDocument(policy, query, id);
+//         word_count += words.size();
+//     }
+//     cout << word_count << endl;
+// }
+
+// #define TEST(policy) Test(#policy, search_server, query, execution::policy)
+
+// int main() {
+//     mt19937 generator;
+
+//     const auto dictionary = GenerateDictionary(generator, 500, 10);
+//     const auto documents = GenerateQueries(generator, dictionary, 5000, 70);
+
+//     const string query = GenerateQuery(generator, dictionary, 250, 0.1);
+
+//     SearchServer search_server(dictionary[0]);
+//     for (size_t i = 0; i < documents.size(); ++i) {
+//         search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
+//     }
+
+//     TEST(seq);
+//     TEST(par);
+// } 
+
+
+
+// // TEST RemvoeDocuments
+
+// #include "search_server.h"
+
+// #include "log_duration.h"
+
+// #include <execution>
+// #include <iostream>
+// #include <random>
+// #include <string>
+// #include <vector>
+
+// using namespace std;
+
+// string GenerateWord(mt19937& generator, int max_length) {
+//     const int length = uniform_int_distribution(1, max_length)(generator);
+//     string word;
+//     word.reserve(length);
+//     for (int i = 0; i < length; ++i) {
+//         word.push_back(uniform_int_distribution('a', 'z')(generator));
+//     }
+//     return word;
+// }
+
+// vector<string> GenerateDictionary(mt19937& generator, int word_count, int max_length) {
+//     vector<string> words;
+//     words.reserve(word_count);
+//     for (int i = 0; i < word_count; ++i) {
+//         words.push_back(GenerateWord(generator, max_length));
+//     }
+//     sort(words.begin(), words.end());
+//     words.erase(unique(words.begin(), words.end()), words.end());
+//     return words;
+// }
+
+// string GenerateQuery(mt19937& generator, const vector<string>& dictionary, int max_word_count) {
+//     const int word_count = uniform_int_distribution(1, max_word_count)(generator);
+//     string query;
+//     for (int i = 0; i < word_count; ++i) {
+//         if (!query.empty()) {
+//             query.push_back(' ');
+//         }
+//         query += dictionary[uniform_int_distribution<int>(0, dictionary.size() - 1)(generator)];
+//     }
+//     return query;
+// }
+
+// vector<string> GenerateQueries(mt19937& generator, const vector<string>& dictionary, int query_count, int max_word_count) {
+//     vector<string> queries;
+//     queries.reserve(query_count);
+//     for (int i = 0; i < query_count; ++i) {
+//         queries.push_back(GenerateQuery(generator, dictionary, max_word_count));
+//     }
+//     return queries;
+// }
+
+// template <typename ExecutionPolicy>
+// void Test(string_view mark, SearchServer search_server, ExecutionPolicy&& policy) {
+//     LOG_DURATION(mark);
+//     const int document_count = search_server.GetDocumentCount();
+//     for (int id = 0; id < document_count; ++id) {
+//         search_server.RemoveDocument(policy, id);
+//     }
+//     cout << search_server.GetDocumentCount() << endl;
+// }
+
+// #define TEST(mode) Test(#mode, search_server, execution::mode)
+
+// int main() {
+//     mt19937 generator;
+    
+//     const auto dictionary = GenerateDictionary(generator, 10000, 25);
+//     const auto documents = GenerateQueries(generator, dictionary, 10'000, 100);
+
+//     SearchServer search_server(dictionary[0]);
+//     for (size_t i = 0; i < documents.size(); ++i) {
+//         search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
+//     }
+
+//     TEST(seq);
+//     TEST(par);
+// } 
+
+// TEST FindTopDocuments
+
+#include "search_server.h"
+
+#include "log_duration.h"
+
+#include <execution>
 #include <iostream>
-#include <map>
-#include <set>
+#include <random>
 #include <string>
-#include <utility>
 #include <vector>
-#include <numeric>
 
 using namespace std;
 
-const int MAX_RESULT_DOCUMENT_COUNT = 5;
-
-string ReadLine() {
-    string s;
-    getline(cin, s);
-    return s;
-}
-
-int ReadLineWithNumber() {
-    int result;
-    cin >> result;
-    ReadLine();
-    return result;
-}
-
-vector<string> SplitIntoWords(const string& text) {
-    vector<string> words;
+string GenerateWord(mt19937& generator, int max_length) {
+    const int length = uniform_int_distribution(1, max_length)(generator);
     string word;
-    for (const char c : text) {
-        if (c == ' ') {
-            words.push_back(word);
-            word = "";
-        } else {
-            word += c;
-        }
+    word.reserve(length);
+    for (int i = 0; i < length; ++i) {
+        word.push_back(uniform_int_distribution('a', 'z')(generator));
     }
-    words.push_back(word);
+    return word;
+}
 
+vector<string> GenerateDictionary(mt19937& generator, int word_count, int max_length) {
+    vector<string> words;
+    words.reserve(word_count);
+    for (int i = 0; i < word_count; ++i) {
+        words.push_back(GenerateWord(generator, max_length));
+    }
+    words.erase(unique(words.begin(), words.end()), words.end());
     return words;
 }
 
-struct Document {
-    int id;
-    double relevance;
-    int rating;
-};
-
-enum class DocumentStatus {
-    ACTUAL,
-    IRRELEVANT,
-    BANNED,
-    REMOVED,
-};
-
-class SearchServer {
-public:
-    void SetStopWords(const string &text) {
-        for (const std::string &word : SplitIntoWords(text)) { stop_words_.insert(word); }
-    }
-
-    void AddDocument(int document_id, const string &document, DocumentStatus status,
-                     const vector<int> &score) {
-        const vector<string> words = SplitIntoWordsNoStop(document);
-
-        documents_.emplace(document_id, DocumentData{ComputeAverageRating(score), status});
-
-        const double inv_word_count = 1.0 / words.size();
-        for (const string &word : words) {
-            word_to_document_freqs_[word][document_id] += inv_word_count;
+string GenerateQuery(mt19937& generator, const vector<string>& dictionary, int word_count, double minus_prob = 0) {
+    string query;
+    for (int i = 0; i < word_count; ++i) {
+        if (!query.empty()) {
+            query.push_back(' ');
         }
-    }
-
-    int GetDocumentCount() const { return static_cast<int>(documents_.size()); }
-
-     vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus status = DocumentStatus::ACTUAL) const {
-        return FindTopDocuments(raw_query, [status](int document_id, DocumentStatus current_status, int rating)
-              {return current_status == status ;});
-    }
-
-    template <typename Predicat>
-    vector<Document> FindTopDocuments(const string& raw_query, Predicat predicat) const {
-        const Query query = ParseQuery(raw_query);
-        auto matched_documents = FindAllDocuments(query, predicat);
-
-        sort(matched_documents.begin(), matched_documents.end(),
-             [](const Document &lhs, const Document &rhs) {
-                 if ((abs(lhs.relevance - rhs.relevance)) < 1e-6) {
-                     return lhs.rating > rhs.rating;
-                 } else {
-                     return lhs.relevance > rhs.relevance;
-                 }
-             });
-
-        if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) {
-            matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
+        if (uniform_real_distribution<>(0, 1)(generator) < minus_prob) {
+            query.push_back('-');
         }
-        return matched_documents;
+        query += dictionary[uniform_int_distribution<int>(0, dictionary.size() - 1)(generator)];
     }
-
-    tuple<vector<string>, DocumentStatus>
-    MatchDocument(const string &raw_query, int document_id) const {
-        const Query query = ParseQuery(raw_query);
-        vector<string> matched_words;
-        for (const auto &word : query.plus_words) {
-            if (word_to_document_freqs_.count(word) == 0) { continue; }
-            if (word_to_document_freqs_.at(word).count(document_id)) {
-                matched_words.push_back(word);
-            }
-        }
-        for (const auto &word : query.minus_words) {
-            if (word_to_document_freqs_.count(word) == 0) { continue; }
-            if (word_to_document_freqs_.at(word).count(document_id)) {
-                matched_words.clear();
-                break;
-            }
-        }
-        return {matched_words, documents_.at(document_id).status};
-    }
-
-private:
-    struct DocumentData {
-        int rating;
-        DocumentStatus status;
-    };
-
-    set<string> stop_words_;
-    map<string, map<int, double>> word_to_document_freqs_;
-    map<int, DocumentData> documents_;
-
-    static int ComputeAverageRating(const vector<int> &score) {
-        return accumulate(score.begin(), score.end(), 0) / static_cast<int>(score.size());
-    }
-
-    bool IsStopWord(const string &word) const {
-        return stop_words_.count(word) > 0;
-    }
-
-    vector<string> SplitIntoWordsNoStop(const string &text) const {
-        vector<string> words;
-        for (const string &word : SplitIntoWords(text)) {
-            if (!IsStopWord(word)) { words.push_back(word); }
-        }
-        return words;
-    }
-
-    struct QueryWord {
-        string data;
-        bool is_minus;
-        bool is_stop;
-    };
-
-    QueryWord ParseQueryWord(string text) const {
-        bool is_minus = false;
-        // Word shouldn't be empty
-        if (text[0] == '-') {
-            is_minus = true;
-            text = text.substr(1);
-        }
-        return {text, is_minus, IsStopWord(text)};
-    }
-
-    struct Query {
-        set<string> plus_words;
-        set<string> minus_words;
-    };
-
-    Query ParseQuery(const string &text) const {
-        Query query;
-        for (const string &word : SplitIntoWords(text)) {
-            const QueryWord query_word = ParseQueryWord(word);
-            if (!query_word.is_stop) {
-                if (query_word.is_minus) {
-                    query.minus_words.insert(query_word.data);
-                } else {
-                    query.plus_words.insert(query_word.data);
-                }
-            }
-        }
-        return query;
-    }
-
-    // Existence required
-    double ComputeWordInverseDocumentFreq(const string &word) const {
-        return log(documents_.size() * 1.0 / word_to_document_freqs_.at(word).size());
-    }
-
-    template<typename Predicate>
-    vector<Document> FindAllDocuments(const Query &query, Predicate predicate) const {
-        map<int, double> document_to_relevance;
-        for (const auto &word : query.plus_words) {
-            if (word_to_document_freqs_.count(word) == 0) { continue; }
-
-            const double inverse_document_freq = ComputeWordInverseDocumentFreq(word);
-
-            for (const auto [document_id, term_freq] : word_to_document_freqs_.at(word)) {
-                if (predicate(document_id, documents_.at(document_id).status,
-                              documents_.at(document_id).rating)) {
-                    document_to_relevance[document_id] += term_freq * inverse_document_freq;
-                }
-            }
-        }
-
-        for (const string &word : query.minus_words) {
-            if (word_to_document_freqs_.count(word) == 0) { continue; }
-            for (const auto [document_id, _] : word_to_document_freqs_.at(word)) {
-                document_to_relevance.erase(document_id);
-            }
-        }
-
-        vector<Document> matched_documents;
-        matched_documents.reserve(document_to_relevance.size());
-        for (const auto [document_id, relevance] : document_to_relevance) {
-            matched_documents.push_back(
-                    {document_id, relevance, documents_.at(document_id).rating});
-        }
-
-        return matched_documents;
-    }
-};
-// ==================== для примера =========================
-
-void PrintDocument(const Document& document) {
-    cout << "{ "s
-         << "document_id = "s << document.id << ", "s
-         << "relevance = "s << document.relevance << ", "s
-         << "rating = "s << document.rating
-         << " }"s << endl;
+    return query;
 }
 
+vector<string> GenerateQueries(mt19937& generator, const vector<string>& dictionary, int query_count, int max_word_count) {
+    vector<string> queries;
+    queries.reserve(query_count);
+    for (int i = 0; i < query_count; ++i) {
+        queries.push_back(GenerateQuery(generator, dictionary, max_word_count));
+    }
+    return queries;
+}
+
+template <typename ExecutionPolicy>
+void Test(string_view mark, const SearchServer& search_server, const vector<string>& queries, ExecutionPolicy&& policy) {
+    LOG_DURATION(mark);
+    double total_relevance = 0;
+    for (const string_view query : queries) {
+        for (const auto& document : search_server.FindTopDocuments(policy, query)) {
+            total_relevance += document.relevance;
+        }
+    }
+    cout << total_relevance << endl;
+}
+
+#define TEST(policy) Test(#policy, search_server, queries, execution::policy)
+
 int main() {
-    SearchServer search_server;
-    search_server.SetStopWords("и в на"s);
+    mt19937 generator;
 
-    search_server.AddDocument(0, "белый кот и модный ошейник"s,        DocumentStatus::ACTUAL, {8, -3});
-    search_server.AddDocument(1, "пушистый кот пушистый хвост"s,       DocumentStatus::ACTUAL, {7, 2, 7});
-    search_server.AddDocument(2, "ухоженный пёс выразительные глаза"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
-    search_server.AddDocument(3, "ухоженный скворец евгений"s,         DocumentStatus::BANNED, {9});
+    const auto dictionary = GenerateDictionary(generator, 1000, 10);
+    const auto documents = GenerateQueries(generator, dictionary, 10'000, 70);
 
-    cout << "ACTUAL by default:"s << endl;
-    for (const Document& document : search_server.FindTopDocuments("пушистый ухоженный кот"s)) {
-        PrintDocument(document);
+    SearchServer search_server(dictionary[0]);
+    for (size_t i = 0; i < documents.size(); ++i) {
+        search_server.AddDocument(i, documents[i], DocumentStatus::ACTUAL, {1, 2, 3});
     }
 
-    cout << "ACTUAL:"s << endl;
-    for (const Document& document : search_server.FindTopDocuments("пушистый ухоженный кот"s, [](int document_id, DocumentStatus status, int rating) { return status == DocumentStatus::ACTUAL; })) {
-        PrintDocument(document);
-    }
+    const auto queries = GenerateQueries(generator, dictionary, 100, 70);
 
-    cout << "Even ids:"s << endl;
-    for (const Document& document : search_server.FindTopDocuments("пушистый ухоженный кот"s, [](int document_id, DocumentStatus status, int rating) { return document_id % 2 == 0; })) {
-        PrintDocument(document);
-    }
-
-    return 0;
+    TEST(seq);
+    TEST(par);
 }
