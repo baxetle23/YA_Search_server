@@ -25,8 +25,9 @@ public:
         }
         std::lock_guard<std::mutex> guard;
         Value& ref_to_value;
-        void operator+=(double value) {
+        Access& operator+=(double value) {
             ref_to_value += value;
+            return *this;
         }
 
     };

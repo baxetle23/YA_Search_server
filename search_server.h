@@ -199,7 +199,7 @@ std::vector<Document> SearchServer::FindAllDocuments(std::execution::parallel_po
 		auto it = std::find_if(std::execution::par, word_to_document_freqs_.begin(), word_to_document_freqs_.end(),
 			[&word](auto& pair) {return pair.first == word;});
 		if (it != word_to_document_freqs_.end()) {
-			for (const auto [document_id, _] : word_to_document_freqs_.at(word)) {
+			for (const auto [document_id, _] : it->second) {
 				document_to_relevance.erase(document_id);
 			}
 		}
