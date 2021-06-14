@@ -74,8 +74,8 @@ private:
 	};
 
 	struct Query {
-	    std::set<std::string, std::less<>> plus_words;
-	    std::set<std::string, std::less<>> minus_words;
+		std::set<std::string, std::less<>> plus_words;
+		std::set<std::string, std::less<>> minus_words;
 	};
 
 	Query ParseQuery(const std::string_view text) const;
