@@ -64,20 +64,20 @@ WordsInDocument SearchServer::MatchDocument(const std::string_view raw_query, in
 	std::vector<std::string_view> matched_words;
 	for (auto& word : query.plus_words) {
 		if (word_to_document_freqs_.count(word) == 0) {
-		continue;
+			continue;
 		}
 		if (word_to_document_freqs_.at(std::string(word)).count(document_id)) {
-		matched_words.push_back(word_to_document_freqs_.find(word)->first);
+			matched_words.push_back(word_to_document_freqs_.find(word)->first);
 		}
 	}
 	for (std::string_view word : query.minus_words) {
 		if (word_to_document_freqs_.count(std::string(word)) == 0) {
-		continue;
-	}
-	if (word_to_document_freqs_.at(std::string(word)).count(document_id)) {
-	matched_words.clear();
-	break;
-	}
+			continue;
+		}
+		if (word_to_document_freqs_.at(std::string(word)).count(document_id)) {
+			matched_words.clear();
+			break;
+		}
 	}
 	return {matched_words, documents_.at(document_id).status};
 }
@@ -198,7 +198,7 @@ void MatchDocuments(const SearchServer& search_server, const std::string& query)
 			const auto [words, status] = search_server.MatchDocument(query, document_id);
 			PrintMatchDocumentResult(document_id, words, status);
 		}
-		} catch (const std::invalid_argument& e) {
-				std::cout << "Ошибка матчинга документов на запрос "s << query << ": "s << e.what() << std::endl;
-			}
+	} catch (const std::invalid_argument& e) {
+			std::cout << "Ошибка матчинга документов на запрос "s << query << ": "s << e.what() << std::endl;
+	}
 }
