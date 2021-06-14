@@ -94,7 +94,8 @@ void SearchServer::RemoveDocument(std::execution::sequenced_policy, int document
 	RemoveDocument(document_id);
 }
 
-std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDocument(const std::string_view raw_query, int document_id) const {
+using WordsInDocument = std::tuple<std::vector<std::string_view>, DocumentStatus>;
+WordsInDocument SearchServer::MatchDocument(const std::string_view raw_query, int document_id) const {
 	const auto query = ParseQuery(raw_query);
     std::vector<std::string_view> matched_words;
     for (auto& word : query.plus_words) {
@@ -117,23 +118,23 @@ std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDoc
     return {matched_words, documents_.at(document_id).status};
 }
 
-std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDocument(std::execution::sequenced_policy,
+WordsInDocument SearchServer::MatchDocument(std::execution::sequenced_policy,
 	const std::string_view raw_query, int document_id) const {
 	return MatchDocument(raw_query, document_id);
 }
 //Понимаю метод скорей всего реализован неверно - тесты с нагрузкой непроходят	- но у меня нет идей как я могу его улучшить
 //1. Оптимизировать функцию ParseQuery
 //2.
-std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDocument(std::execution::parallel_policy,
+WordsInDocument SearchServer::MatchDocument(std::execution::parallel_policy,
 	const std::string_view raw_query, int document_id) const {
 	const auto query = ParseQuery(raw_query);	
     static std::vector<std::string_view> matched_words;
  	matched_words.reserve(query.plus_words.size());
     std::copy_if(std::execution::par, query.plus_words.begin(), query.plus_words.end(),
-                      std::back_inserter(matched_words),
-                       [&](auto word){
-            return word_to_document_freqs_.count(word) && word_to_document_freqs_.at(word).count(document_id);
-        });
+						std::back_inserter(matched_words),
+						[&](auto word){
+						return word_to_document_freqs_.count(word) && word_to_document_freqs_.at(word).count(document_id);
+						});
 	for (const std::string& word : query.minus_words) {
 		if (word_to_document_freqs_.count(word) && word_to_document_freqs_.at(word).count(document_id)) {
 			matched_words.clear();
