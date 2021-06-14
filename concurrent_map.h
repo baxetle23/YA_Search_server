@@ -25,6 +25,9 @@ public:
         }
         std::lock_guard<std::mutex> guard;
         Value& ref_to_value;
+        void operator+=(double value) {
+            ref_to_value += value;
+        }
 
     };
 
@@ -34,6 +37,12 @@ public:
     Access operator[](const Key& key) {
         auto index = key % count_maps_;
         return {maps_[index], key};
+    }
+
+    void erase(const Key& key) {
+        const size_t index = key % maps_.size();
+        std::lock_guard guard(maps_[index].map_mutex);
+        maps_[index].map.erase(key);
     }
 
     std::map<Key, Value> BuildOrdinaryMap() {
@@ -49,43 +58,3 @@ private:
     std::vector<Bucket> maps_;
     size_t count_maps_;
 };
-
-// template <typename Key>
-// class ConcurrentSet {
-// public:
-
-//     struct Bucket
-//     {
-//         std::set<Key> set;
-//         std::mutex set_mutex;
-//     };
-
-//     struct Access {
-//         Access(Bucket& bucket, const Key& key) :  guard(bucket.map_mutex), ref_to_value(bucket.set[key]) {
-//         }
-//         std::lock_guard<std::mutex> guard;
-//         Key& ref_to_value;
-
-//     };
-
-//     explicit ConcurrentSet(size_t bucket_count) : sets_(bucket_count), count_sets_(bucket_count) {
-//     }
-
-//     Access operator[](const Key& key) {
-//         auto index = key % count_sets_;
-//         return {sets_[index], key};
-//     }
-
-//     std::set<Key> BuildOrdinarySet() {
-//         std::set<Key> result;
-//         for(size_t i = 0; i < count_sets_; ++i) {
-//             std::lock_guard guard(sets_[i].set_mutex);
-//             result.insert(sets_[i].set.begin(), sets_[i].set.end());
-//         }
-//         return result;
-//     }
-
-// private:
-//     std::vector<Bucket> sets_;
-//     size_t count_sets_;
-// };
