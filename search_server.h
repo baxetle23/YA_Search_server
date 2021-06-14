@@ -22,50 +22,50 @@ public:
 	
 	template <typename StringContainer>
 	explicit SearchServer(const StringContainer& stop_words);
-    explicit SearchServer(const std::string& stop_words_text);
-    explicit SearchServer(const std::string_view stop_words_text);
+	explicit SearchServer(const std::string& stop_words_text);
+	explicit SearchServer(const std::string_view stop_words_text);
 
-    void AddDocument(int document_id, const std::string_view& document, DocumentStatus status, const std::vector<int>& ratings);
+	void AddDocument(int document_id, const std::string_view& document, DocumentStatus status, const std::vector<int>& ratings);
 
 	template <typename DocumentPredicate>
-    std::vector<Document> FindTopDocuments(const std::string_view raw_query, DocumentPredicate document_predicate) const;
-    std::vector<Document> FindTopDocuments(const std::string_view raw_query, DocumentStatus status) const;
-    std::vector<Document> FindTopDocuments(const std::string_view raw_query) const; 
+	std::vector<Document> FindTopDocuments(const std::string_view raw_query, DocumentPredicate document_predicate) const;
+	std::vector<Document> FindTopDocuments(const std::string_view raw_query, DocumentStatus status) const;
+	std::vector<Document> FindTopDocuments(const std::string_view raw_query) const; 
 
-    template <typename DocumentPredicate, typename ExecutionPolicy>
-    std::vector<Document> FindTopDocuments(ExecutionPolicy&& policy, const std::string_view raw_query, DocumentPredicate document_predicate) const;
-    template <typename ExecutionPolicy>
-    std::vector<Document> FindTopDocuments(ExecutionPolicy&& policy, const std::string_view raw_query, DocumentStatus status) const;
-    template <typename ExecutionPolicy>
-    std::vector<Document> FindTopDocuments(ExecutionPolicy&& policy, const std::string_view raw_query) const;
+	template <typename DocumentPredicate, typename ExecutionPolicy>
+	std::vector<Document> FindTopDocuments(ExecutionPolicy&& policy, const std::string_view raw_query, DocumentPredicate document_predicate) const;
+	template <typename ExecutionPolicy>
+	std::vector<Document> FindTopDocuments(ExecutionPolicy&& policy, const std::string_view raw_query, DocumentStatus status) const;
+	template <typename ExecutionPolicy>
+	std::vector<Document> FindTopDocuments(ExecutionPolicy&& policy, const std::string_view raw_query) const;
 
-    std::tuple<std::vector<std::string_view>, DocumentStatus> MatchDocument(const std::string_view raw_query, int document_id) const;
-    std::tuple<std::vector<std::string_view>, DocumentStatus> MatchDocument(std::execution::parallel_policy, const std::string_view raw_query, int document_id) const;
-    std::tuple<std::vector<std::string_view>, DocumentStatus> MatchDocument(std::execution::sequenced_policy, const std::string_view raw_query, int document_id) const;
+	std::tuple<std::vector<std::string_view>, DocumentStatus> MatchDocument(const std::string_view raw_query, int document_id) const;
+	std::tuple<std::vector<std::string_view>, DocumentStatus> MatchDocument(std::execution::parallel_policy, const std::string_view raw_query, int document_id) const;
+	std::tuple<std::vector<std::string_view>, DocumentStatus> MatchDocument(std::execution::sequenced_policy, const std::string_view raw_query, int document_id) const;
 
 	int GetDocumentCount() const;
 	std::set<int>::const_iterator begin() const;
 	std::set<int>::const_iterator end() const;
-    const std::map<std::string_view, double>& GetWordFrequencies(int document_id) const;
-	
+	const std::map<std::string_view, double>& GetWordFrequencies(int document_id) const;
+
 	void RemoveDocument(int document_id);
-    void RemoveDocument(std::execution::parallel_policy, int document_id);
-    void RemoveDocument(std::execution::sequenced_policy, int document_id);
+	void RemoveDocument(std::execution::parallel_policy, int document_id);
+	void RemoveDocument(std::execution::sequenced_policy, int document_id);
 
 private:
 	struct DocumentData {
 		int rating;
 		DocumentStatus status;
 	};
-    const std::set<std::string> stop_words_;
+	const std::set<std::string> stop_words_;
 	std::map<std::string, std::map<int, double>> word_to_document_freqs_;
 	std::map<int, DocumentData> documents_;
-    std::map<int, std::map<std::string,double>>  id_freqs_word_;
+	std::map<int, std::map<std::string,double>>  id_freqs_word_;
 	std::set<int> document_ids_;
 
 	bool IsStopWord(const std::string_view word) const;
 	static bool IsValidWord(const std::string_view word);
-    std::vector<std::string> SplitIntoWordsNoStop(const std::string_view text) const;
+	std::vector<std::string> SplitIntoWordsNoStop(const std::string_view text) const;
 
 	struct QueryWord {
 		std::string data;
@@ -74,11 +74,11 @@ private:
 	};
 
 	struct Query {
-        std::set<std::string, std::less<>> plus_words;
-        std::set<std::string, std::less<>> minus_words;
+	    std::set<std::string, std::less<>> plus_words;
+	    std::set<std::string, std::less<>> minus_words;
 	};
 
-    Query ParseQuery(const std::string_view text) const;
+	Query ParseQuery(const std::string_view text) const;
 	QueryWord ParseQueryWord(const std::string_view text) const;
 
 	double ComputeWordInverseDocumentFreq(const std::string& word) const;
@@ -128,7 +128,7 @@ std::vector<Document> SearchServer::FindTopDocuments(ExecutionPolicy&& policy, c
 		std::sort(policy, matched_documents.begin(), matched_documents.end(), [](const Document& lhs, const Document& rhs) {
 			if (std::abs(lhs.relevance - rhs.relevance) < 1e-6) {
 				return lhs.rating > rhs.rating;
-			} else {
+				} else {
 				return lhs.relevance > rhs.relevance;
 			}
 		});
